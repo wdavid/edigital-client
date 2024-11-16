@@ -43,7 +43,7 @@ export default function RegisterPage() {
     }
 
     try {
-      const response = await api.post("/auth/register", formData);
+   // const response = await api.post("/auth/register", formData);
 
       setSuccess("Usuario registrado exitosamente. Redirigiendo al inicio de sesión...");
       setTimeout(() => {
