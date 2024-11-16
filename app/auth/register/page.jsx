@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-//import api from "../../api/utils/api";
+import api from "../../api/utils/api";
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -43,14 +43,13 @@ export default function RegisterPage() {
     }
 
     try {
-   // const response = await api.post("/auth/register", formData);
+      await api.post("/auth/register", formData);
 
       setSuccess("Usuario registrado exitosamente. Redirigiendo al inicio de sesión...");
       setTimeout(() => {
-        router.push("/auth/login"); // Redirige al login tras unos segundos
-      }, 2000); // Espera 2 segundos antes de redirigir
+        router.push("/auth/login"); 
+      }, 2000); 
 
-      // Limpia el formulario tras un registro exitoso
       setFormData({
         username: "",
         email: "",
@@ -60,7 +59,7 @@ export default function RegisterPage() {
       });
     } catch (err) {
       console.error("Error en el registro:", err);
-      setError(err.response?.data?.error || "Algo salió mal.");
+      setError( "Algo salió mal.");
     }
   };
 
