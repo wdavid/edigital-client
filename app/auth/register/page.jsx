@@ -43,6 +43,7 @@ export default function RegisterPage() {
     }
 
     try {
+      // Llamada a la API para registrar al usuario
       await api.post("/auth/register", formData);
 
       setSuccess("Usuario registrado exitosamente. Redirigiendo al inicio de sesión...");
@@ -50,6 +51,7 @@ export default function RegisterPage() {
         router.push("/auth/login"); 
       }, 2000); 
 
+      // Reiniciar el formulario
       setFormData({
         username: "",
         email: "",
@@ -58,8 +60,10 @@ export default function RegisterPage() {
         password: "",
       });
     } catch (err) {
-      console.error("Error en el registro:", err);
-      setError( "Algo salió mal.");
+      // Captura el error y lo muestra al usuario
+      const errorMessage = err.response?.data?.error || "Ocurrió un error al registrar el usuario.";
+      console.log("Error al registrar usuario:", errorMessage);
+      setError(errorMessage);
     }
   };
 
