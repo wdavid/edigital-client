@@ -1,8 +1,8 @@
 export const metadata = {
-    title: 'IES Siglo XXI',
+    title: 'Digital client',
     description: '',
     keywords: '',
-    author: 'IES Siglo XXI',
+    author: 'David Hernandez',
     viewport: 'width=device-width, initial-scale=1',
     robots: 'index, follow',
     icons: {
@@ -12,14 +12,14 @@ export const metadata = {
     openGraph: {
       title: '',
       description: '',
-      url: 'https://https://www.iessigloxxisevilla.com/',
-      siteName: 'IES Siglo XXI',
+      url: 'https://edigital-service.vercel.app/',
+      siteName: 'Digital client',
       images: [
         {
           url: '',
           width: 1200,
           height: 630,
-          alt: 'Imagen de IES Siglo XXI',
+          alt: '',
         },
       ],
       type: 'website',

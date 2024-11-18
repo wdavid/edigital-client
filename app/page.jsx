@@ -3,39 +3,36 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { Doughnut, Line } from "react-chartjs-2";
+import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement } from "chart.js";
 import { isTokenValid, getToken, getUserIdFromToken, fetchAuthenticatedUser } from "../utils/auth";
-import { Doughnut } from "react-chartjs-2";
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 
-// Registrar componentes necesarios de Chart.js
-ChartJS.register(ArcElement, Tooltip, Legend);
+ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement);
 
-// Función para obtener datos del usuario con Axios
-const fetchUserConsumption = async (userId, token) => {
+const fetchUserConsumption = async (url, token) => {
   try {
-    const response = await axios.get(
-      `https://edigital-service.vercel.app/api/post/daily/${userId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    const data = response.data;
-
-    if (data.length > 0) {
-      const { totalVolumen, totalVasos, user } = data[0];
-      return {
-        totalLitros: totalVolumen,
-        totalVasos,
-        user,
-      };
-    }
-
-    return { totalLitros: 0, totalVasos: 0, user: null };
+    const response = await axios.get(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
   } catch (error) {
-    console.error("Error fetching user consumption:", error);
-    return { totalLitros: 0, totalVasos: 0, user: null };
+    console.error(`Error fetching data from ${url}:`, error);
+    return null;
+  }
+};
+
+const sendConfigToArduino = async (userId, token) => {
+  try {
+    const response = await axios.post("http://arduino.local/api/config", {
+      userId,
+      token,
+    });
+    alert("Configuración enviada al Arduino exitosamente.");
+  } catch (error) {
+    console.error("Error enviando configuración al Arduino:", error);
+    alert("Error al enviar configuración al Arduino.");
   }
 };
 
@@ -44,10 +41,18 @@ export default function WelcomePage() {
   const [vasos, setVasos] = useState(0);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [weeklyData, setWeeklyData] = useState([]);
+  const [monthlyData, setMonthlyData] = useState([]);
+  const [view, setView] = useState("daily");
   const router = useRouter();
 
+  const logout = () => {
+    localStorage.removeItem("token");
+    router.push("/auth/login");
+  };
+
   useEffect(() => {
-    const validateTokenAndFetchData = async () => {
+    const fetchData = async () => {
       const token = getToken();
 
       if (!isTokenValid(token)) {
@@ -68,14 +73,33 @@ export default function WelcomePage() {
         setUser(authenticatedUser);
       }
 
-      const { totalLitros, totalVasos, user: userData } = await fetchUserConsumption(userId, token);
-      setLitros(totalLitros);
-      setVasos(totalVasos);
-      if (!user) setUser(userData);
+      const dailyData = await fetchUserConsumption(
+        `https://edigital-service.vercel.app/api/post/daily/${userId}`,
+        token
+      );
+
+      const weeklyData = await fetchUserConsumption(
+        `https://edigital-service.vercel.app/api/post/weekly/${userId}`,
+        token
+      );
+
+      const monthlyData = await fetchUserConsumption(
+        `https://edigital-service.vercel.app/api/post/monthly/${userId}`,
+        token
+      );
+
+      if (dailyData) {
+        setLitros(dailyData.totalVolumen || 0);
+        setVasos(dailyData.totalVasos || 0);
+        setUser(dailyData.user || null);
+      }
+
+      setWeeklyData(weeklyData?.weeklyConsumption || []);
+      setMonthlyData(monthlyData?.monthlyConsumption || []);
       setLoading(false);
     };
 
-    validateTokenAndFetchData();
+    fetchData();
   }, [router]);
 
   if (loading) {
@@ -86,18 +110,39 @@ export default function WelcomePage() {
     );
   }
 
-  // Configuración de datos para el gráfico
-  const progress = vasos; // Vasos consumidos
-  const goal = user?.metaconsumo || 0; // Meta diaria de consumo
-  const remaining = Math.max(goal - progress, 0); // Vasos restantes para alcanzar la meta
-
-  const data = {
+  const dailyChartData = {
     labels: ["Consumido", "Restante"],
     datasets: [
       {
-        data: [progress, remaining],
-        backgroundColor: ["#3b82f6", "#e5e7eb"], // Colores para las secciones
+        data: [vasos, Math.max(user?.metaconsumo - vasos, 0)],
+        backgroundColor: ["#3b82f6", "#e5e7eb"],
         hoverBackgroundColor: ["#2563eb", "#d1d5db"],
+      },
+    ],
+  };
+
+  const weeklyChartData = {
+    labels: weeklyData.map((item) => item.dayOfWeek),
+    datasets: [
+      {
+        label: "Vasos",
+        data: weeklyData.map((item) => item.totalVasos),
+        borderColor: "#3b82f6",
+        backgroundColor: "rgba(59, 130, 246, 0.2)",
+        tension: 0.3,
+      },
+    ],
+  };
+
+  const monthlyChartData = {
+    labels: monthlyData.map((item) => `Día ${item.day}`),
+    datasets: [
+      {
+        label: "Vasos",
+        data: monthlyData.map((item) => item.totalVasos),
+        borderColor: "#10b981",
+        backgroundColor: "rgba(16, 185, 129, 0.2)",
+        tension: 0.3,
       },
     ],
   };
@@ -110,35 +155,65 @@ export default function WelcomePage() {
         </h1>
         <p className="text-lg text-gray-700 mb-4 font-bold">Correo: <span className="font-normal">{user?.email}</span></p>
         <p className="text-lg text-gray-700 mb-4 font-bold">
-          Meta de consumo: <span className="font-normal">{user?.metaconsumo} vasos</span>
-        </p>
-        <p className="text-lg text-gray-700 mb-4">
-          Aquí está tu progreso de hidratación para hoy:
+          Meta de consumo diaria: <span className="font-normal">{user?.metaconsumo} vasos</span>
         </p>
 
-        <div className="flex flex-col items-center">
-          <div className="flex justify-center items-center w-52 gap-6 mb-4">
-            <Doughnut data={data}/>
-          </div>
+        <div className="flex justify-center gap-4 mb-6">
+          <button
+            onClick={() => setView("daily")}
+            className={`px-4 py-2 rounded-lg ${view === "daily" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"}`}
+          >
+            Diario
+          </button>
+          <button
+            onClick={() => setView("weekly")}
+            className={`px-4 py-2 rounded-lg ${view === "weekly" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"}`}
+          >
+            Semanal
+          </button>
+          <button
+            onClick={() => setView("monthly")}
+            className={`px-4 py-2 rounded-lg ${view === "monthly" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"}`}
+          >
+            Mensual
+          </button>
         </div>
 
-        <div className="flex justify-center items-center gap-6 mb-4">
+        {view === "daily" && (
           <div className="flex flex-col items-center">
-            <span className="text-4xl font-bold text-blue-600">{litros.toFixed(2)}</span>
-            <span className="text-gray-500">Litros</span>
+            <div className="flex justify-center w-60">
+              <Doughnut data={dailyChartData} />
+            </div>
           </div>
-          <div className="flex flex-col items-center">
-            <span className="text-4xl font-bold text-blue-600">{vasos}</span>
-            <span className="text-gray-500">Vasos</span>
-          </div>
-        </div>
+        )}
 
-        <button
-          onClick={() => alert("¡Sigue hidratándote!")}
-          className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
-        >
-          ¡Mantén el ritmo!
-        </button>
+        {view === "weekly" && (
+          <div className="flex justify-center">
+            <Line data={weeklyChartData} />
+          </div>
+        )}
+
+        {view === "monthly" && (
+          <div className="flex justify-center">
+            <Line data={monthlyChartData} />
+          </div>
+        )}
+
+        <div className="space-x-3">
+          <button
+            onClick={() => sendConfigToArduino(user?._id, getToken())}
+            className="bg-green-500 text-white px-6 py-2 mt-6 rounded-lg hover:bg-green-600 transition"
+          >
+            Configurar Arduino
+          </button>
+
+          <button
+            onClick={logout}
+            className="bg-red-500 text-white px-6 py-2 mt-6 rounded-lg hover:bg-red-600 transition"
+          >
+            Cerrar sesión
+          </button>
+        </div>
       </div>
     </div>
   );
