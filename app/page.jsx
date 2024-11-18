@@ -23,7 +23,7 @@ const fetchUserConsumption = async (url, token) => {
   }
 };
 
-const sendConfigToArduino = async (userId, token) => {
+/*const sendConfigToArduino = async (userId, token) => {
   try {
     const response = await axios.post("http://arduino.local/api/config", {
       userId,
@@ -34,10 +34,8 @@ const sendConfigToArduino = async (userId, token) => {
     console.error("Error enviando configuración al Arduino:", error);
     alert("Error al enviar configuración al Arduino.");
   }
-};
-
+};*/
 export default function WelcomePage() {
-  const [litros, setLitros] = useState(0);
   const [vasos, setVasos] = useState(0);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -89,7 +87,6 @@ export default function WelcomePage() {
       );
 
       if (dailyData) {
-        setLitros(dailyData.totalVolumen || 0);
         setVasos(dailyData.totalVasos || 0);
         setUser(dailyData.user || null);
       }
