@@ -36,7 +36,8 @@ const fetchUserConsumption = async (url, token) => {
   }
 };*/
 export default function WelcomePage() {
-  const [vasos, setVasos] = useState(0);
+  //const [vasos, setVasos] = useState(0);
+  const [volumen, setVolumen] = useState(0);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [weeklyData, setWeeklyData] = useState([]);
@@ -87,7 +88,7 @@ export default function WelcomePage() {
       );
 
       if (dailyData) {
-        setVasos(dailyData.totalVasos || 0);
+        setVolumen(dailyData.totalVolumen || 0);
         setUser(dailyData.user || null);
       }
 
@@ -111,7 +112,7 @@ export default function WelcomePage() {
     labels: ["Consumido", "Restante"],
     datasets: [
       {
-        data: [vasos, Math.max(user?.metaconsumo - vasos, 0)],
+        data: [volumen, Math.max(user?.metaconsumo - volumen, 0)],
         backgroundColor: ["#3b82f6", "#e5e7eb"],
         hoverBackgroundColor: ["#2563eb", "#d1d5db"],
       },
@@ -122,8 +123,8 @@ export default function WelcomePage() {
     labels: weeklyData.map((item) => item.dayOfWeek),
     datasets: [
       {
-        label: "Vasos",
-        data: weeklyData.map((item) => item.totalVasos),
+        label: "Litros",
+        data: weeklyData.map((item) => item.totalVolumen),
         borderColor: "#3b82f6",
         backgroundColor: "rgba(59, 130, 246, 0.2)",
         tension: 0.3,
@@ -135,8 +136,8 @@ export default function WelcomePage() {
     labels: monthlyData.map((item) => `Día ${item.day}`),
     datasets: [
       {
-        label: "Vasos",
-        data: monthlyData.map((item) => item.totalVasos),
+        label: "Litros",
+        data: monthlyData.map((item) => item.totalVolumen),
         borderColor: "#10b981",
         backgroundColor: "rgba(16, 185, 129, 0.2)",
         tension: 0.3,
@@ -152,7 +153,7 @@ export default function WelcomePage() {
         </h1>
         <p className="text-lg text-gray-700 mb-4 font-bold">Correo: <span className="font-normal">{user?.email}</span></p>
         <p className="text-lg text-gray-700 mb-4 font-bold">
-          Meta de consumo diaria: <span className="font-normal">{user?.metaconsumo} vasos</span>
+          Meta de consumo diaria: <span className="font-normal">{user?.metaconsumo} Litros</span>
         </p>
 
         <div className="flex justify-center gap-4 mb-6">

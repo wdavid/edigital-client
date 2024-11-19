@@ -10,7 +10,7 @@ export default function RegisterPage() {
     username: "",
     email: "",
     fechaNacimiento: "",
-    metaconsumo: 0,
+    metaconsumo: "",
     password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
@@ -24,7 +24,7 @@ export default function RegisterPage() {
 
     setFormData({
       ...formData,
-      [name]: name === "metaconsumo" ? Number(value) : value,
+      [name]: value,
     });
   };
 
@@ -131,14 +131,12 @@ export default function RegisterPage() {
 
         <div className="mb-4">
           <label htmlFor="metaconsumo" className="block text-gray-700 font-medium text-sm">
-            Meta de consumo diario (vasos):
+            Meta de consumo diario (Litros):
           </label>
           <input
             id="metaconsumo"
             type="number"
             name="metaconsumo"
-            min="0.1"
-            step="0.1"
             value={formData.metaconsumo}
             onChange={handleChange}
             className="w-full px-4 py-2 text-gray-700 border rounded-lg focus:ring focus:ring-blue-300"
