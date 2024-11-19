@@ -46,7 +46,7 @@ export default function LoginPage() {
           <img
             src="/logo.png"
             alt="Logo"
-            className="w-20 h-20 mx-auto mb-4"
+            className="w-20 mx-auto mb-4"
           />
         </div>
         <h2 className="text-2xl text-black font-bold text-center mb-4">Iniciar Sesión</h2>
