@@ -148,30 +148,34 @@ export default function WelcomePage() {
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-blue-50">
       <div className="bg-white shadow-lg rounded-lg p-6 md:p-10 w-11/12 md:w-1/2 text-center">
-        <h1 className="text-3xl font-bold text-blue-600 mb-4">
+        <h1 className="text-3xl font-bold text-blue-600 mb-2">
           ¡Bienvenido, {user?.username || "Usuario"}!
         </h1>
-        <p className="text-lg text-gray-700 mb-4 font-bold">Correo: <span className="font-normal">{user?.email}</span></p>
-        <p className="text-lg text-gray-700 mb-4 font-bold">
+        <div className="flex flex-col items-center">
+          <img src="/logo.png" alt="logo" className="w-20" />
+        </div>
+        <p className="text-base text-gray-700 font-bold">Correo: <span className="font-normal">{user?.email}</span></p>
+        <p className="text-base text-gray-700 font-bold">
           Meta de consumo diaria: <span className="font-normal">{user?.metaconsumo} Litros</span>
         </p>
+        <p className="text-base text-gray-700 mb-6 font-bold">Litros consumidos hoy: <span className="font-normal">{volumen} Litros</span></p>
 
         <div className="flex justify-center gap-4 mb-6">
           <button
             onClick={() => setView("daily")}
-            className={`px-4 py-2 rounded-lg ${view === "daily" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"}`}
+            className={`px-4 py-1 rounded-lg ${view === "daily" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"}`}
           >
             Diario
           </button>
           <button
             onClick={() => setView("weekly")}
-            className={`px-4 py-2 rounded-lg ${view === "weekly" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"}`}
+            className={`px-4 py-1 rounded-lg ${view === "weekly" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"}`}
           >
             Semanal
           </button>
           <button
             onClick={() => setView("monthly")}
-            className={`px-4 py-2 rounded-lg ${view === "monthly" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"}`}
+            className={`px-4 py-1 rounded-lg ${view === "monthly" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"}`}
           >
             Mensual
           </button>

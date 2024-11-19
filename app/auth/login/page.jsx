@@ -42,6 +42,13 @@ export default function LoginPage() {
         onSubmit={handleSubmit}
         className="bg-white shadow-lg rounded-lg p-6 w-full max-w-sm"
       >
+        <div className="flex flex-col items-center">
+          <img
+            src="/logo.png"
+            alt="Logo"
+            className="w-20 h-20 mx-auto mb-4"
+          />
+        </div>
         <h2 className="text-2xl text-black font-bold text-center mb-4">Iniciar Sesión</h2>
 
         {error && <p className="text-red-500 mb-4">{error}</p>}
